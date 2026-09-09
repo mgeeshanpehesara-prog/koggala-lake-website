@@ -1,0 +1,75 @@
+{
+  "home": {
+    "heroTitle": "Discover the Magic of Koggala Lake",
+    "heroSubtitle": "Private boat safaris and kayaking adventures with a local touch by Malish.",
+    "heroBadge": "Private • Safe • Unforgettable",
+    "heroImage": "/uploads/1788889291280-v828ah99.webp",
+    "primaryButtonText": "Explore Experiences",
+    "secondaryButtonText": "Watch Video",
+    "aboutTitle": "A Personal Introduction to Koggala Lake",
+    "aboutDescription": "We're a small, local team based on Koggala Lake, offering private boat safaris and kayaking adventures led personally by Malish. Our focus is a relaxed, genuine experience — wildlife, mangroves and Cinnamon Island, shared with real local knowledge rather than a rushed group circuit.",
+    "aboutImage": "https://picsum.photos/seed/koggala-about-malish/1000/800"
+  },
+  "about": {
+    "title": "A Local, Personal Way to Experience Koggala Lake",
+    "sections": [
+      "Koggala Lake Boat Safari & Kayak Adventure with Malish is a small, locally run tourism experience based directly on Koggala Lake in southern Sri Lanka.",
+      "We specialise in private boat safaris and kayaking adventures that move at a relaxed pace — giving guests time to take in the lake's mangroves, wildlife and small islands, including a stop at Cinnamon Island for a short cinnamon demonstration and a fresh cinnamon drink.",
+      "Every tour is guided personally by Malish, whose local knowledge of the lake shapes each trip — from where the birds and monkeys tend to gather to the calmest channels for kayaking.",
+      "Safety and comfort come first: life jackets are provided on every experience, and group sizes are kept small so the visit feels personal rather than rushed.",
+      "Whether you choose the private boat safari, a guided kayaking adventure, or a self-guided kayak rental, our aim is the same — a genuine, unhurried introduction to Koggala Lake."
+    ],
+    "images": [
+      "https://picsum.photos/seed/koggala-about-full/1000/800"
+    ]
+  },
+  "general": {
+    "contactPhone": "+94 77 123 4567",
+    "whatsappNumber": "+94771234567",
+    "email": "boatsafariwithmalish@gmail.com",
+    "meetingPoint": "Koggala Lake meeting point",
+    "footerText": "Private boat safaris and kayaking adventures on Koggala Lake with Malish.",
+    "instagram": "https://www.instagram.com/koggalalakeboatsafarikayaking/",
+    "facebook": "",
+    "tripadvisor": "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html"
+  },
+  "reviews": {
+    "heading": "Loved by travelers across Google, GetYourGuide & Tripadvisor",
+    "subtitle": "Real ratings from travelers who have experienced Koggala Lake with us.",
+    "totalReviewsOverride": null,
+    "google": {
+      "rating": 5,
+      "reviewCount": 505,
+      "url": "https://www.google.com/search?q=Koggala+Lake+Boat+Safari+%26+Kayak+Adventure+with+Malish",
+      "logoUrl": "/uploads/1788888266022-i3q0omgj.png",
+      "links": [
+        "https://www.google.com/search?q=Koggala+Lake+Boat+Safari+%26+Kayak+Adventure+with+Malish"
+      ]
+    },
+    "getyourguide": {
+      "rating": 0,
+      "reviewCount": 0,
+      "url": "",
+      "logoUrl": "/uploads/1788888277738-0zj8syn1.png",
+      "links": []
+    },
+    "tripadvisor": {
+      "rating": 0,
+      "reviewCount": 0,
+      "url": "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html",
+      "logoUrl": "/uploads/1788888282608-1kq587q4.png",
+      "links": [
+        "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html"
+      ]
+    }
+  },
+  "socialLinks": [
+    {
+      "id": "tripadvisor",
+      "platform": "Instagram",
+      "name": "Koggala Lake Boat Safari",
+      "url": "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html",
+      "imageUrl": "/uploads/1788892199414-0104tejq.jpeg"
+    }
+  ]
+}

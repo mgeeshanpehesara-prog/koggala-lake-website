@@ -1,0 +1,33 @@
+[
+  {
+    "id": "gyg-boat-safari",
+    "platform": "Google",
+    "rating": 5,
+    "productSlug": "boat-safari",
+    "isPlaceholder": true,
+    "text": "We had an amazing boat safari experience! The ride was peaceful, scenic, and full of interesting stops. We especially enjoyed discovering the Martin Wickramasinghe Island and learning the fascinating story of how cinnamon is grown and processed. It was a perfect mix of nature, culture, and local history.\nA special thank you to our guide, Maleesha, who was friendly, knowledgeable, and made the tour enjoyable from start to finish. He explained everything clearly and made sure we had a memorable experience.\nHighly recommend this safari tour to anyone visiting Sri Lanka. Thank you for such a wonderful day!",
+    "authorName": "Google guest",
+    "featured": false,
+    "displayOrder": 1
+  },
+  {
+    "id": "review-1788884699760",
+    "platform": "Google",
+    "authorName": "The Eagle",
+    "rating": 5,
+    "text": "We had an amazing boat safari experience! The ride was peaceful, scenic, and full of interesting stops. We especially enjoyed discovering the Martin Wickramasinghe Island and learning the fascinating story of how cinnamon is grown and processed. It was a perfect mix of nature, culture, and local history.\nA special thank you to our guide, Maleesha, who was friendly, knowledgeable, and made the tour enjoyable from start to finish. He explained everything clearly and made sure we had a memorable experience.\nHighly recommend this safari tour to anyone visiting Sri Lanka. Thank you for such a wonderful day!",
+    "isPlaceholder": false,
+    "featured": true,
+    "displayOrder": 1
+  },
+  {
+    "id": "review-1788884754080",
+    "platform": "Google",
+    "authorName": "Pasindu Jayakodi ( Jay )",
+    "rating": 5,
+    "text": "We were a group of 8 friends, and kayaking at Koggala Lake was honestly one of the best experiences we had in Sri Lanka. The entire journey through the lake was peaceful, exciting, and filled with breathtaking natural beauty. From the calm water to the stunning mangrove surroundings, everything felt relaxing and unforgettable. 🌿🚣‍♂️\nA special thanks to Maleesha for guiding us throughout the adventure and teaching us how to paddle the kayaks properly. He was very friendly, supportive, and made the whole experience enjoyable even for beginners. The facilities they provide are clean, well organized, and definitely worth the price. You can clearly see the professionalism and care they put into the experience.\nThe highlight of the trip was kayaking through the beautiful mangrove tunnels while enjoying the fresh air and peaceful atmosphere of the lake. The best time to start is around 3:30 PM to 4:30 PM because you get to witness the stunning sunset over the water. The golden colors reflecting on the lake created such an amazing view and made the experience even more special. 🌅✨\nHighly recommended for anyone visiting Koggala or nearby areas like Ahangama. Whether you travel with friends, family, or your partner, this kayaking adventure is something you should never miss. Truly an unforgettable experience with beautiful memories to take home!",
+    "isPlaceholder": false,
+    "featured": true,
+    "displayOrder": 2
+  }
+]

@@ -1,0 +1,3 @@
+import {NextResponse} from "next/server";
+import {adminCredentials} from "@/lib/admin-auth";
+export async function POST(req:Request){ const {email,password}=await req.json(); const c=adminCredentials(); if(!c.email||!c.password||email!==c.email||password!==c.password||!process.env.ADMIN_SESSION_TOKEN) return NextResponse.json({error:"Invalid credentials or admin environment is not configured."},{status:401}); const res=NextResponse.json({ok:true}); res.cookies.set("admin_session",process.env.ADMIN_SESSION_TOKEN!,{httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production",path:"/",maxAge:60*60*24*7}); return res; }

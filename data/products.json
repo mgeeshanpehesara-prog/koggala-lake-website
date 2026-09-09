@@ -1,0 +1,137 @@
+[
+  {
+    "slug": "wildlife-cinnamon-kayaking",
+    "category": "kayak-tour",
+    "categoryLabel": "Kayak Adventure",
+    "badge": "Popular Choice",
+    "name": "Wildlife + Cinnamon Island Kayaking",
+    "shortDescription": "A guided double-kayak adventure through Koggala Lake, mangroves and Cinnamon Island.",
+    "fullDescription": [
+      "Paddle across Koggala Lake in a double kayak with an experienced guide. The route combines calm water, mangrove scenery and local wildlife spotting.",
+      "Stop at Cinnamon Island for a cinnamon demonstration and fresh cinnamon drink, then continue exploring the lake at a comfortable pace."
+    ],
+    "duration": "2 Hours",
+    "experienceType": "Private Tour",
+    "equipment": "Double Kayak",
+    "maxPeople": 8,
+    "timeSlots": [
+      "06:30 AM",
+      "08:30 AM",
+      "10:30 AM",
+      "12:30 PM",
+      "02:30 PM",
+      "04:30 PM"
+    ],
+    "childrenFree": true,
+    "priceDisplay": "From USD 20 / adult",
+    "priceBase": {
+      "amount": 20,
+      "currency": "USD",
+      "unit": "/ adult"
+    },
+    "rating": 4.8,
+    "reviewCount": 21,
+    "ratingSource": "GetYourGuide",
+    "highlights": [
+      "Double Kayak",
+      "Cinnamon Island",
+      "Wildlife",
+      "Fresh Cinnamon Drink",
+      "Life Jackets",
+      "Experienced Guide"
+    ],
+    "included": [
+      "Double kayak",
+      "Paddling equipment",
+      "Life jackets",
+      "Guide",
+      "Cinnamon Island demonstration & drink"
+    ],
+    "excluded": [
+      "Hotel pickup and drop-off",
+      "Personal expenses"
+    ],
+    "meetingPoint": "Koggala Lake meeting point",
+    "cancellationPolicy": "Free cancellation up to 24 hours before the experience. Bad-weather changes can be arranged through WhatsApp.",
+    "mainImage": "/uploads/1788883837229-kvzudkll.webp",
+    "galleryImages": [
+      "/uploads/1788883845160-5svx092v.webp",
+      "/uploads/1788883849478-2r33hizz.webp",
+      "/uploads/1788883849464-cbv1oaiq.webp",
+      "/uploads/1788883849287-3o8oavzv.webp",
+      "/uploads/1788883849482-qyhqznyt.webp",
+      "/uploads/1788883849328-0hbtovlf.webp",
+      "/uploads/1788883849326-vl5u9hnx.webp",
+      "/uploads/1788883849291-z2tu2s1f.webp",
+      "/uploads/1788883849248-70wc2fn2.webp",
+      "/uploads/1788883849483-sd4mnc2n.webp",
+      "/uploads/1788883844118-wdzczalw.webp",
+      "/uploads/1788883849303-6cx1dk9z.webp",
+      "/uploads/1788883849480-cvbrbf22.webp",
+      "/uploads/1788883849768-pmxh0tpe.webp",
+      "/uploads/1788883849330-0hdfrqka.webp",
+      "/uploads/1788883849465-0lbuu9w7.webp"
+    ],
+    "pricingTiers": [],
+    "requiresHotelPickupDropoff": false
+  },
+  {
+    "slug": "self-guided-kayak-rental",
+    "category": "kayak-rental",
+    "categoryLabel": "Kayak Rental",
+    "badge": "Self-Guided",
+    "name": "Self-Guided Kayak Rental Experience on Koggala Lake",
+    "shortDescription": "Explore Koggala Lake at your own pace with a double kayak, safety briefing and route guidance.",
+    "fullDescription": [
+      "Take a double kayak onto Koggala Lake and explore independently for two hours. Before departure, receive a safety briefing and route guidance so you can enjoy the lake confidently.",
+      "This is a self-guided experience with freedom to choose your own pace and route."
+    ],
+    "duration": "2 Hours",
+    "experienceType": "Self-Guided",
+    "equipment": "Double Kayak",
+    "maxPeople": 8,
+    "timeSlots": [
+      "06:30 AM",
+      "08:30 AM",
+      "10:30 AM",
+      "12:30 PM",
+      "02:30 PM",
+      "04:30 PM"
+    ],
+    "childrenFree": true,
+    "priceDisplay": "From USD 18 / adult",
+    "priceBase": {
+      "amount": 18,
+      "currency": "USD",
+      "unit": "/ adult"
+    },
+    "rating": 5,
+    "reviewCount": 1,
+    "ratingSource": "GetYourGuide",
+    "highlights": [
+      "Double Kayak",
+      "Life Jackets",
+      "Safety Briefing",
+      "Route Guidance",
+      "Self-Guided Freedom"
+    ],
+    "included": [
+      "Double kayak",
+      "Paddling equipment",
+      "Life jackets",
+      "Safety briefing",
+      "Route guidance"
+    ],
+    "excluded": [
+      "Hotel pickup and drop-off",
+      "Dedicated guide",
+      "Personal expenses"
+    ],
+    "meetingPoint": "Koggala Lake meeting point",
+    "cancellationPolicy": "Free cancellation up to 24 hours before the experience. Weather-related changes can be arranged through WhatsApp.",
+    "mainImage": "https://images.unsplash.com/photo-1501554728187-ce583db33af7?auto=format&fit=crop&w=1400&q=85",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1526351957053-6b0c7d3c7d2a?auto=format&fit=crop&w=1200&q=80"
+    ]
+  }
+]
