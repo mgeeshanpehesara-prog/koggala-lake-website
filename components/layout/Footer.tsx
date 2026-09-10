@@ -20,9 +20,9 @@ const experienceLinks = [
 ];
 
 const legalLinks = [
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms & Conditions" },
-  { href: "/cancellation", label: "Cancellation Policy" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-and-conditions", label: "Terms & Conditions" },
+  { href: "/return-policy", label: "Cancellation & Refund Policy" },
 ];
 
 export default async function Footer() {
