@@ -5,7 +5,7 @@ import { getWebsiteContent } from "@/lib/data/website-content-store";
 export default async function Hero() {
   const { home } = await getWebsiteContent();
   return (
-    <section className="relative flex min-h-[72vh] items-end overflow-hidden sm:min-h-[92vh]">
+    <section className="relative flex min-h-[56vh] items-end overflow-hidden sm:min-h-[92vh]">
       <SafeImage
         src={home.heroImage}
         alt="Sunset over Koggala Lake with a private boat safari"
@@ -16,7 +16,7 @@ export default async function Hero() {
       />
       <div className="absolute inset-0 bg-hero-gradient" />
 
-      <div className="container-premium relative z-10 pb-10 pt-28 sm:pb-28 sm:pt-40">
+      <div className="container-premium relative z-10 pb-8 pt-20 sm:pb-28 sm:pt-40">
         <div className="max-w-2xl animate-fade-in-up">
           <span className="glass-panel inline-flex items-center rounded-full px-3 py-1 text-xs sm:px-4 sm:py-1.5 sm:text-sm font-semibold uppercase tracking-wide text-teal-300">
             {home.heroBadge}

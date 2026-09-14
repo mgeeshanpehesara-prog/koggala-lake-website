@@ -25,7 +25,7 @@ export default function ProductCard({
         className
       )}
     >
-      <div className="relative h-64 w-full overflow-hidden sm:h-72">
+      <div className="relative h-[210px] w-full overflow-hidden sm:h-72">
         <SafeImage
           src={product.mainImage}
           alt={product.name}
@@ -35,41 +35,41 @@ export default function ProductCard({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/10 to-transparent" />
         {product.badge && (
-          <Badge className="absolute left-4 top-4 bg-gold-500 text-navy-950">{product.badge}</Badge>
+          <Badge className="absolute left-3 top-3 bg-gold-500 text-navy-950 sm:left-4 sm:top-4">{product.badge}</Badge>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 flex-col p-4 sm:p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-teal-400">{product.categoryLabel}</p>
-        <h3 className="mt-2 min-h-[3.5rem] font-display text-xl font-medium leading-tight text-sand-50 line-clamp-2 sm:text-2xl">
+        <h3 className="mt-1.5 font-display text-base font-medium leading-snug text-sand-50 line-clamp-2 sm:mt-2 sm:min-h-[3.5rem] sm:text-2xl sm:leading-tight">
           {product.name}
         </h3>
 
-        <div className="mt-3 flex items-center gap-2 text-sm text-sand-200/70">
+        <div className="mt-2 flex items-center gap-2 text-xs text-sand-200/70 sm:mt-3 sm:text-sm">
           <StarRating rating={product.rating} />
           <span>({product.reviewCount.toLocaleString()} reviews)</span>
         </div>
 
-        <div className="mt-4 flex min-h-[2.75rem] flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-sand-200/65">
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-sand-200/65 sm:mt-4 sm:min-h-[2.75rem]">
           <span>{product.duration}</span>
           <span aria-hidden="true" className="text-teal-400">&middot;</span>
           <span>{product.experienceType}</span>
           {product.equipment && <><span aria-hidden="true" className="text-teal-400">&middot;</span><span>{product.equipment}</span></>}
         </div>
 
-        <p className="mt-3 min-h-[2.75rem] text-sm leading-relaxed text-sand-200/65 line-clamp-2">{product.shortDescription}</p>
+        <p className="hidden text-sm leading-relaxed text-sand-200/65 line-clamp-2 sm:mt-3 sm:block sm:min-h-[2.75rem]">{product.shortDescription}</p>
 
-        <div className="mt-6 flex items-end justify-between gap-4 border-t border-white/10 pt-5">
+        <div className="mt-3 flex items-end justify-between gap-3 border-t border-white/10 pt-3 sm:mt-6 sm:gap-4 sm:pt-5">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sand-200/50">From</p>
-            <p className="mt-1 font-display text-xl font-semibold text-teal-400">
+            <p className="mt-1 font-display text-lg font-semibold text-teal-400 sm:text-xl">
               {displayPrice(product.priceBase.amount, product.priceBase.currency)}
               <span className="ml-1 text-xs font-sans font-normal text-sand-200/60">
                 {product.priceBase.unit}
               </span>
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-teal-400/35 bg-teal-400/10 px-3 py-2 text-xs font-semibold text-teal-300 transition-all group-hover:gap-2 group-hover:bg-teal-400/20">
+          <span className="inline-flex items-center gap-1 rounded-full border border-teal-400/35 bg-teal-400/10 px-2.5 py-1.5 text-xs font-semibold text-teal-300 transition-all group-hover:gap-2 group-hover:bg-teal-400/20 sm:px-3 sm:py-2">
             Explore Experience
             <svg viewBox="0 0 16 16" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.8">
               <path d="M2 8h11M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
