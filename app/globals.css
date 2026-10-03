@@ -178,3 +178,30 @@
   .booking-panel { position: static; }
   .container-premium { max-width: 100%; }
 }
+
+/* TripAdvisor Travelers' Choice widget: once TripAdvisor's embed script runs,
+   it replaces our markup with its own "#CDSWIDCOE" wrapper, which TripAdvisor's
+   stylesheet gives a solid white background/fixed width. These overrides keep
+   our dark section background visible around the badge without altering the
+   official badge artwork itself. IDs are the stable ones TripAdvisor's widget
+   always renders, so this applies before and after the embed script runs. */
+#TA_certificateOfExcellence993 #CDSWIDCOE {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+#TA_certificateOfExcellence993 #CDSWIDCOELOGO {
+  width: auto !important;
+  height: 64px !important;
+  margin: 0 auto !important;
+}
+
+@media (min-width: 640px) {
+  #TA_certificateOfExcellence993 #CDSWIDCOELOGO {
+    height: 80px !important;
+  }
+}
