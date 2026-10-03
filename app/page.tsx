@@ -1,4 +1,5 @@
 import Hero from "@/components/home/Hero";
+import TripAdvisorAward from "@/components/home/TripAdvisorAward";
 import TrustBadges from "@/components/home/TrustBadges";
 import ExperienceSection from "@/components/home/ExperienceSection";
 import ReviewsSection from "@/components/home/ReviewsSection";
@@ -15,6 +16,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <TripAdvisorAward />
       <TrustBadges />
       <ExperienceSection />
       <ReviewsSection />
