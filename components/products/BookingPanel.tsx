@@ -5,7 +5,6 @@ import type { Product } from "@/lib/types";
 import { useCurrency } from "@/lib/currency/CurrencyContext";
 import { siteConfig } from "@/lib/site-config";
 import DatePicker from "@/components/ui/DatePicker";
-import type { PaymentBrand } from "@/lib/payment-gateway";
 import { getTimeSlotCutoff, isTimeSlotBookable } from "@/lib/time-slots";
 
 export default function BookingPanel({ product }: { product: Product }) {
@@ -24,8 +23,7 @@ export default function BookingPanel({ product }: { product: Product }) {
   const [hotelAddress, setHotelAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<"select" | "details" | "summary" | "payment">("select");
-  const [paymentBrand, setPaymentBrand] = useState<PaymentBrand>("visa");
-  const [paymentMode, setPaymentMode] = useState<"Pay Online" | "Pay on Arrival">("Pay Online");
+
   const [bookingId, setBookingId] = useState("");
   const [confirmation, setConfirmation] = useState<any | null>(null);
   const [error, setError] = useState("");
@@ -41,14 +39,12 @@ export default function BookingPanel({ product }: { product: Product }) {
   const unit = tier?.pricePerPerson ?? product.priceBase.amount;
   const total = Math.max(0, Number((unit * adults).toFixed(2)));
   const bookingTotal = Number(convertAmount(total, product.priceBase.currency).toFixed(2));
-  const amountDueNow = paymentMode === "Pay on Arrival" ? 0 : bookingTotal;
-  const amountDue = paymentMode === "Pay on Arrival" ? bookingTotal : 0;
 
   const whatsapp = `https://wa.me/${siteConfig.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
     `Booking request\n${product.name}\nName: ${firstName} ${lastName}\nDate: ${date}\nTime: ${time}\nAdults: ${adults}\nChildren: ${children}\nEmail: ${email}`
   )}`;
 
-  async function handleCardPayment() {
+  async function handleReservation() {
     setError("");
     setIsSubmitting(true);
 
@@ -85,103 +81,53 @@ export default function BookingPanel({ product }: { product: Product }) {
     }
 
     try {
-      if (paymentMode === "Pay on Arrival") {
-        const response = await fetch("/api/booking", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productSlug: product.slug,
-            productName: product.name,
-            date,
-            time,
-            adults,
-            children,
-            firstName,
-            lastName,
-            email,
-            phone,
-            country,
-            ...(requiresHotelPickup ? { hotelName, hotelAddress } : {}),
-            notes,
-            paymentMethod: "Pay on Arrival",
-            paymentType: paymentMode,
-            currency,
-            totalAmount: total,
-            amountDueNow: 0,
-            remainingBalance: bookingTotal,
-          }),
-        });
-        const data = await response.json();
-        if (!response.ok || !data.ok) {
-          setError(data.error || "Could not reserve this experience.");
-          return;
-        }
-        const booking = data.booking;
-        setBookingId(booking.id || booking.bookingReference);
-        setConfirmation({
-          bookingReference: booking.bookingReference,
-          product: booking.productName,
-          date: booking.date,
-          time: booking.time,
-          guests: `${booking.adults} adults, ${booking.children} children`,
-          total: booking.totalAmount,
-          amountPaid: booking.amountPaid,
-          amountDue: booking.remainingBalance,
-          currency: booking.currency,
-          paymentMethod: booking.paymentMethod,
-          paymentStatus: booking.paymentStatus,
-          payOnArrival: true,
-        });
-        return;
-      }
-
-      const response = await fetch("/api/payhere/create-checkout", {
+      const response = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          paymentBrand,
-          amount: bookingTotal,
+          productSlug: product.slug,
+          productName: product.name,
+          date,
+          time,
+          adults,
+          children,
+          firstName,
+          lastName,
+          email,
+          phone,
+          country,
+          ...(requiresHotelPickup ? { hotelName, hotelAddress } : {}),
+          notes,
+          paymentMethod: "Pay on Arrival",
           currency,
-          bookingData: {
-            productSlug: product.slug,
-            productName: product.name,
-            date,
-            time,
-            adults,
-            children,
-            firstName,
-            lastName,
-            email,
-            phone,
-            country,
-            ...(requiresHotelPickup ? { hotelName, hotelAddress } : {}),
-            notes,
-            paymentMethod: "Pay Online - Full Amount",
-            paymentBrand,
-            paymentType: paymentMode,
-            currency,
-            totalAmount: total,
-            amountDueNow: bookingTotal,
-            remainingBalance: 0,
-          },
+          totalAmount: total,
+          amountDueNow: 0,
+          remainingBalance: bookingTotal,
         }),
       });
-
       const data = await response.json();
       if (!response.ok || !data.ok) {
-        setError(data.error || "Online card payment is not currently available.");
-        setIsSubmitting(false);
+        setError(data.error || "Could not reserve this experience.");
         return;
       }
-
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-        return;
-      }
-
-      setError("Online card payment is not currently available.");
+      const booking = data.booking;
+      setBookingId(booking.id || booking.bookingReference);
+      setConfirmation({
+        bookingReference: booking.bookingReference,
+        product: booking.productName,
+        date: booking.date,
+        time: booking.time,
+        guests: `${booking.adults} adults, ${booking.children} children`,
+        total: booking.totalAmount,
+        amountPaid: booking.amountPaid,
+        amountDue: booking.remainingBalance,
+        currency: booking.currency,
+        paymentMethod: booking.paymentMethod,
+        paymentStatus: booking.paymentStatus,
+        payOnArrival: true,
+      });
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Could not start the payment flow.");
+      setError(error instanceof Error ? error.message : "Could not reserve this experience.");
     } finally {
       setIsSubmitting(false);
     }
@@ -332,11 +278,11 @@ export default function BookingPanel({ product }: { product: Product }) {
               </>
             )}
             <span>Total: {displayPrice(total, product.priceBase.currency)}</span>
-            <span>{paymentMode === "Pay on Arrival" ? "Amount due on arrival" : "Amount due now"}: {displayPrice(paymentMode === "Pay on Arrival" ? amountDue : amountDueNow, currency)}</span>
+            <span>Amount due on arrival: {displayPrice(bookingTotal, currency)}</span>
           </div>
 
           <button className="cta-button full" onClick={() => setStep("payment")}>
-            Continue to Payment →
+            Continue to Reservation →
           </button>
           <button className="back-button" onClick={() => setStep("details")}>← Back</button>
         </div>
@@ -351,36 +297,19 @@ export default function BookingPanel({ product }: { product: Product }) {
               {date} · {time} · {adults} adults · {children} children
             </span>
             <span>Total: {displayPrice(total, product.priceBase.currency)}</span>
-            <span>{paymentMode === "Pay on Arrival" ? "Amount due on arrival" : "Amount due now"}: {displayPrice(paymentMode === "Pay on Arrival" ? amountDue : amountDueNow, currency)}</span>
+            <span>Amount due on arrival: {displayPrice(bookingTotal, currency)}</span>
           </div>
 
-          <div className="pay-options">
-            <button className={paymentMode === "Pay Online" ? "selected" : ""} onClick={() => setPaymentMode("Pay Online")}>
-              <b>Pay Online - Full Amount</b>
-              <span>Pay the full reservation total securely online.</span>
-            </button>
-            <button className={paymentMode === "Pay on Arrival" ? "selected" : ""} onClick={() => setPaymentMode("Pay on Arrival")}>
-              <b>Reserve Now, Pay on Arrival</b>
-              <span>Reserve your experience now and pay the full amount when you arrive at the boat location.</span>
-            </button>
+          <div className="payment-summary">
+            <b>Reserve Now, Pay on Arrival</b>
+            <span>Payment is due in full when you arrive at the boat location.</span>
           </div>
-
-          {paymentMode === "Pay Online" && <div className="pay-options">
-            <button className={paymentBrand === "visa" ? "selected" : ""} onClick={() => setPaymentBrand("visa")}>
-              <b>Visa</b>
-              <span>Pay with Visa</span>
-            </button>
-            <button className={paymentBrand === "mastercard" ? "selected" : ""} onClick={() => setPaymentBrand("mastercard")}>
-              <b>Mastercard</b>
-              <span>Pay with Mastercard</span>
-            </button>
-          </div>}
 
           {error && <p className="error-message">{error}</p>}
 
-          <button className={paymentMode === "Pay on Arrival" ? "cta-button full" : "card-button"} onClick={handleCardPayment} disabled={isSubmitting}>
-            {isSubmitting ? "Processing..." : paymentMode === "Pay on Arrival" ? "Reserve Now" : `💳 Pay with ${paymentBrand === "visa" ? "Visa" : "Mastercard"}`}
-            <span>{displayPrice(paymentMode === "Pay on Arrival" ? amountDue : amountDueNow, currency)}</span>
+          <button className="cta-button full" onClick={handleReservation} disabled={isSubmitting}>
+            {isSubmitting ? "Reserving..." : "Reserve Now, Pay on Arrival"}
+            <span>{displayPrice(bookingTotal, currency)}</span>
           </button>
 
           <a className="whatsapp-button" href={whatsapp} target="_blank" rel="noreferrer">
@@ -388,7 +317,7 @@ export default function BookingPanel({ product }: { product: Product }) {
           </a>
 
           <p className="secure-note">
-            {paymentMode === "Pay on Arrival" ? "Your reservation will be saved immediately. Payment is due in full when you arrive at the boat location." : "Your booking is confirmed after the payment provider verifies the transaction."}
+            Your reservation will be saved immediately. Payment is due in full when you arrive at the boat location.
           </p>
 
           <button className="back-button" onClick={() => setStep("summary")}>← Back</button>
@@ -426,4 +355,3 @@ export default function BookingPanel({ product }: { product: Product }) {
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createBookingRecord, readBookings, validateBookingRequest, writeBookings } from "@/lib/booking-service";
 import { getPendingOrder, removePendingOrder, verifyPayHereSignature } from "@/lib/payment-gateway";
-import { notifyPaymentVerified } from "@/lib/notifications/booking-notifications";
+import { notifyPaymentVerified, toNotificationsLog } from "@/lib/notifications/booking-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +69,10 @@ export async function POST(req: Request) {
     const validated = await validateBookingRequest(payload);
     const bookings = await readBookings();
     const duplicateIndex = bookings.findIndex((existing) => existing.payhereOrderId === orderId || existing.bookingReference === payload.bookingReference);
+    // Capture the pre-update payment status before we overwrite it below, so
+    // a retried/duplicate PayHere webhook for an already-paid booking is
+    // correctly detected and does not trigger a second "payment received" email.
+    const wasAlreadyPaid = duplicateIndex >= 0 && bookings[duplicateIndex].paymentStatus === "Paid";
     const booking = duplicateIndex >= 0 ? { ...bookings[duplicateIndex] } : createBookingRecord(payload, validated);
     const amountPaid = Number(amount || 0);
     if (amountPaid < booking.totalAmount) {
@@ -83,10 +87,19 @@ export async function POST(req: Request) {
     booking.payherePaymentId = paymentId || booking.payherePaymentId || "";
     booking.gatewayConfigured = true;
     booking.updatedAt = new Date().toISOString();
+    const bookingIndex = duplicateIndex >= 0 ? duplicateIndex : bookings.length;
     if (duplicateIndex >= 0) bookings[duplicateIndex] = booking; else bookings.push(booking);
+    // Save the paid booking first so a webhook retry or an email failure can
+    // never roll back or corrupt the payment record.
     await writeBookings(bookings);
     await removePendingOrder(orderId);
-    if (duplicateIndex < 0 || bookings[duplicateIndex]?.paymentStatus !== "Paid") await notifyPaymentVerified(booking);
+
+    if (!wasAlreadyPaid) {
+      const notifications = await notifyPaymentVerified(booking);
+      booking.notifications = toNotificationsLog(notifications);
+      bookings[bookingIndex] = booking;
+      await writeBookings(bookings);
+    }
 
     return NextResponse.json({ ok: true, paymentStatus: "Paid", booking });
   } catch (error) {

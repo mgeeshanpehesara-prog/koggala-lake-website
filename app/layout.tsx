@@ -47,7 +47,7 @@ export default function RootLayout({
               telephone: siteConfig.phone,
               email: siteConfig.email,
               url: siteConfig.url,
-              sameAs: [siteConfig.social.facebook, siteConfig.social.instagram, siteConfig.social.tripadvisor],
+              sameAs: [siteConfig.social.facebook, siteConfig.social.instagram, siteConfig.social.tiktok, siteConfig.social.tripadvisor],
               aggregateRating: { "@type": "AggregateRating", ratingValue: 5, reviewCount: 505 },
             }),
           }}

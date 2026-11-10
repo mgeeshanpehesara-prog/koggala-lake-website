@@ -11,9 +11,19 @@ const RESEND_URL = "https://api.resend.com/emails";
 const WHATSAPP_URL = "https://graph.facebook.com/v20.0";
 const stateFile = path.join(process.cwd(), "data", "booking-notifications.json");
 
-type NotificationState = Record<string, { reservationEmail?: boolean; reservationWhatsApp?: boolean; ownerEmail?: boolean; ownerWhatsApp?: boolean; paymentEmail?: boolean; paymentWhatsApp?: boolean; paymentOwnerEmail?: boolean; paymentOwnerWhatsApp?: boolean }>;
-type EmailResult = { ok: boolean; providerId?: string; error?: string; status?: number };
+// Email delivery is tracked with an explicit status so the system never
+// reports "sent" when the provider was actually unconfigured or the send
+// failed. Only a "sent" entry blocks a retry (duplicate webhook delivery);
+// "not_configured"/"failed" entries are retried on the next attempt.
+type EmailDeliveryStatus = "sent" | "not_configured" | "failed";
+type StoredEmailResult = { status: EmailDeliveryStatus; error?: string; providerId?: string; sentAt: string };
+type NotificationState = Record<string, { reservationEmail?: StoredEmailResult; reservationWhatsApp?: boolean; ownerEmail?: StoredEmailResult; ownerWhatsApp?: boolean; paymentEmail?: StoredEmailResult; paymentWhatsApp?: boolean; paymentOwnerEmail?: StoredEmailResult; paymentOwnerWhatsApp?: boolean }>;
+type EmailResult = { ok: boolean; status: EmailDeliveryStatus; providerId?: string; error?: string; httpStatus?: number };
 type BookingNotificationResult = { customerEmail: EmailResult; ownerEmail: EmailResult };
+
+function toStoredResult(result: EmailResult): StoredEmailResult {
+  return { status: result.status, error: result.error, providerId: result.providerId, sentAt: new Date().toISOString() };
+}
 
 async function readState(): Promise<NotificationState> {
   try { return JSON.parse(await fs.readFile(stateFile, "utf8")) as NotificationState; } catch { return {}; }
@@ -62,8 +72,13 @@ function details(booking: Booking, locations: string, instructions: string, what
 async function sendEmail(to: string, subject: string, text: string, html: string): Promise<EmailResult> {
   const provider = (process.env.EMAIL_PROVIDER || "resend").toLowerCase();
   const key = process.env.RESEND_API_KEY; const from = process.env.EMAIL_FROM;
-  if (provider !== "resend") return { ok: false, error: `Unsupported email provider: ${provider}` };
-  if (!key || !from || !to) return { ok: false, error: "Missing RESEND_API_KEY, EMAIL_FROM, or recipient email." };
+
+  if (provider !== "resend") {
+    return { ok: false, status: "not_configured", error: `Unsupported email provider: ${provider}. Set EMAIL_PROVIDER=resend.` };
+  }
+  if (!key || !from || !to) {
+    return { ok: false, status: "not_configured", error: "Missing RESEND_API_KEY, EMAIL_FROM, or recipient email." };
+  }
   if (from.toLowerCase().includes("onboarding@resend.dev")) {
     console.warn("[booking-email] EMAIL_FROM uses Resend sandbox sender onboarding@resend.dev; arbitrary customer delivery may be restricted. Verify a sending domain and use that domain in EMAIL_FROM for production.");
   }
@@ -72,11 +87,11 @@ async function sendEmail(to: string, subject: string, text: string, html: string
     const response = await fetch(RESEND_URL, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify({ from, to: [to], subject, text, html }) });
     const body = await response.json().catch(() => null) as { id?: string; message?: string; error?: string } | null;
     if (!response.ok) {
-      return { ok: false, status: response.status, error: body?.message || body?.error || `Resend rejected the email with HTTP ${response.status}.` };
+      return { ok: false, status: "failed", httpStatus: response.status, error: body?.message || body?.error || `Resend rejected the email with HTTP ${response.status}.` };
     }
-    return { ok: true, status: response.status, providerId: body?.id };
+    return { ok: true, status: "sent", httpStatus: response.status, providerId: body?.id };
   } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "Email request failed." };
+    return { ok: false, status: "failed", error: error instanceof Error ? error.message : "Email request failed." };
   }
 }
 async function sendWhatsApp(to: string, text: string) {
@@ -85,8 +100,19 @@ async function sendWhatsApp(to: string, text: string) {
   const response = await fetch(`${WHATSAPP_URL}/${phoneId}/messages`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ messaging_product: "whatsapp", to: to.replace(/[^\d]/g, ""), type: "text", text: { body: text } }) });
   return response.ok;
 }
-async function markSent(booking: Booking, key: keyof NonNullable<NotificationState[string]>) {
+async function markWhatsAppSent(booking: Booking, key: "reservationWhatsApp" | "ownerWhatsApp" | "paymentWhatsApp" | "paymentOwnerWhatsApp") {
   const state = await readState(); state[booking.bookingReference] = { ...(state[booking.bookingReference] || {}), [key]: true }; await writeState(state);
+}
+async function recordEmailResult(booking: Booking, key: "reservationEmail" | "ownerEmail" | "paymentEmail" | "paymentOwnerEmail", result: EmailResult) {
+  const state = await readState();
+  state[booking.bookingReference] = { ...(state[booking.bookingReference] || {}), [key]: toStoredResult(result) };
+  await writeState(state);
+}
+function logEmailResult(scope: "customer" | "owner", booking: Booking, to: string, result: EmailResult) {
+  const line = `[booking-email] ${scope} ${booking.bookingReference} to ${to}: ${result.status}${result.providerId ? ` (${result.providerId})` : ""}${result.error ? ` - ${result.error}` : ""}`;
+  if (result.status === "sent") console.info(line);
+  else if (result.status === "not_configured") console.warn(line);
+  else console.error(line);
 }
 async function notify(booking: Booking, payment: boolean): Promise<BookingNotificationResult> {
   const content = await getWebsiteContent(); const settings = content.bookingNotifications; const configuredOwnerEmail = process.env.BOOKING_OWNER_EMAIL || settings.ownerEmail; const locationText = [content.locations.ticketOffice.enabled && `${content.locations.ticketOffice.name}: ${content.locations.ticketOffice.description}${content.locations.ticketOffice.url ? `\n${content.locations.ticketOffice.buttonText}: ${content.locations.ticketOffice.url}` : ""}`, content.locations.boatPlace.enabled && `${content.locations.boatPlace.name}: ${content.locations.boatPlace.description}${content.locations.boatPlace.url ? `\n${content.locations.boatPlace.buttonText}: ${content.locations.boatPlace.url}` : ""}`].filter(Boolean).join("\n");
@@ -116,19 +142,36 @@ async function notify(booking: Booking, payment: boolean): Promise<BookingNotifi
   const state = await readState(); const current = state[booking.bookingReference] || {};
   const customerEmailKey = payment ? "paymentEmail" : "reservationEmail";
   const ownerEmailKey = payment ? "paymentOwnerEmail" : "ownerEmail";
-  const customerAlreadySent = current[customerEmailKey];
-  const ownerAlreadySent = current[ownerEmailKey];
-  const customerEmail = customerAlreadySent ? { ok: true, error: "Already sent for this booking." } : await sendEmail(booking.email, `${payment ? "Booking Confirmed" : businessName} - Booking ${booking.bookingReference}`, customerText, customerHtml);
-  console.info(`[booking-email] customer ${booking.bookingReference} to ${booking.email}: ${customerEmail.ok ? "accepted" : "failed"}${customerEmail.providerId ? ` (${customerEmail.providerId})` : ""}${customerEmail.error ? ` - ${customerEmail.error}` : ""}`);
-  if (customerEmail.ok && !customerAlreadySent) await markSent(booking, customerEmailKey);
-  if (!payment && !current.reservationWhatsApp) { if (await sendWhatsApp(booking.phone, `BOOKING CONFIRMATION\n\n${text}`)) await markSent(booking, "reservationWhatsApp"); }
-  const ownerResult = ownerAlreadySent ? { ok: true, error: "Already sent for this booking." } : await sendEmail(configuredOwnerEmail, `${payment ? "Payment received" : "New Booking Notification"} - ${booking.bookingReference}`, ownerText, ownerHtml);
-  console.info(`[booking-email] owner ${booking.bookingReference} to ${configuredOwnerEmail}: ${ownerResult.ok ? "accepted" : "failed"}${ownerResult.providerId ? ` (${ownerResult.providerId})` : ""}${ownerResult.error ? ` - ${ownerResult.error}` : ""}`);
-  if (ownerResult.ok && !ownerAlreadySent) await markSent(booking, ownerEmailKey);
-  if (!payment && !current.ownerWhatsApp) { if (await sendWhatsApp(settings.ownerWhatsApp, `NEW BOOKING RECEIVED\n\n${text}`)) await markSent(booking, "ownerWhatsApp"); }
-  if (payment && !current.paymentWhatsApp) { if (await sendWhatsApp(booking.phone, `BOOKING CONFIRMATION\n\n${text}`)) await markSent(booking, "paymentWhatsApp"); }
-  if (payment && !current.paymentOwnerWhatsApp) { if (await sendWhatsApp(settings.ownerWhatsApp, `PAYMENT RECEIVED\n\n${text}`)) await markSent(booking, "paymentOwnerWhatsApp"); }
+  // Only a previously "sent" email blocks a retry, so a webhook retry after a
+  // transient failure (or after the provider gets configured) can still succeed.
+  const customerAlreadySent = current[customerEmailKey]?.status === "sent";
+  const ownerAlreadySent = current[ownerEmailKey]?.status === "sent";
+  const customerEmail: EmailResult = customerAlreadySent
+    ? { ok: true, status: "sent", error: "Already sent for this booking." }
+    : await sendEmail(booking.email, `${payment ? "Booking Confirmed" : businessName} - Booking ${booking.bookingReference}`, customerText, customerHtml);
+  logEmailResult("customer", booking, booking.email, customerEmail);
+  if (!customerAlreadySent) await recordEmailResult(booking, customerEmailKey, customerEmail);
+  if (!payment && !current.reservationWhatsApp) { if (await sendWhatsApp(booking.phone, `BOOKING CONFIRMATION\n\n${text}`)) await markWhatsAppSent(booking, "reservationWhatsApp"); }
+  const ownerResult: EmailResult = ownerAlreadySent
+    ? { ok: true, status: "sent", error: "Already sent for this booking." }
+    : await sendEmail(configuredOwnerEmail, `${payment ? "Payment received" : "New Booking Notification"} - ${booking.bookingReference}`, ownerText, ownerHtml);
+  logEmailResult("owner", booking, configuredOwnerEmail, ownerResult);
+  if (!ownerAlreadySent) await recordEmailResult(booking, ownerEmailKey, ownerResult);
+  if (!payment && !current.ownerWhatsApp) { if (await sendWhatsApp(settings.ownerWhatsApp, `NEW BOOKING RECEIVED\n\n${text}`)) await markWhatsAppSent(booking, "ownerWhatsApp"); }
+  if (payment && !current.paymentWhatsApp) { if (await sendWhatsApp(booking.phone, `BOOKING CONFIRMATION\n\n${text}`)) await markWhatsAppSent(booking, "paymentWhatsApp"); }
+  if (payment && !current.paymentOwnerWhatsApp) { if (await sendWhatsApp(settings.ownerWhatsApp, `PAYMENT RECEIVED\n\n${text}`)) await markWhatsAppSent(booking, "paymentOwnerWhatsApp"); }
   return { customerEmail, ownerEmail: ownerResult };
 }
 export async function notifyBookingCreated(booking: Booking) { return notify(booking, false); }
 export async function notifyPaymentVerified(booking: Booking) { return notify(booking, true); }
+
+/** Builds the per-booking notification summary persisted onto the Booking
+ * record so the admin dashboard can clearly show sent / not_configured /
+ * failed for the customer and owner emails of this booking. */
+export function toNotificationsLog(result: BookingNotificationResult) {
+  const now = new Date().toISOString();
+  return {
+    customerEmail: { status: result.customerEmail.status, error: result.customerEmail.error, providerId: result.customerEmail.providerId, sentAt: now },
+    ownerEmail: { status: result.ownerEmail.status, error: result.ownerEmail.error, providerId: result.ownerEmail.providerId, sentAt: now },
+  };
+}

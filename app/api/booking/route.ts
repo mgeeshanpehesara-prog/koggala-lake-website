@@ -8,7 +8,7 @@ import {
   validateBookingRequest,
   writeBookings,
 } from "@/lib/booking-service";
-import { notifyBookingCreated } from "@/lib/notifications/booking-notifications";
+import { notifyBookingCreated, toNotificationsLog } from "@/lib/notifications/booking-notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -36,16 +36,22 @@ export async function POST(req: Request) {
     const booking = createBookingRecord(body, validated);
     const bookings = await readBookings();
     bookings.push(booking);
+    // Save the booking first so a later email failure can never cost the
+    // customer their reservation.
     await writeBookings(bookings);
+
     const notifications = await notifyBookingCreated(booking);
+    booking.notifications = toNotificationsLog(notifications);
+    // Second write only updates the notification status on the same record.
+    await writeBookings(bookings);
 
     return NextResponse.json({
       ok: true,
       booking,
       gatewayConfigured: false,
       notifications: {
-        customerEmailAccepted: notifications.customerEmail.ok,
-        ownerEmailAccepted: notifications.ownerEmail.ok,
+        customerEmail: { status: notifications.customerEmail.status, error: notifications.customerEmail.ok ? undefined : notifications.customerEmail.error },
+        ownerEmail: { status: notifications.ownerEmail.status, error: notifications.ownerEmail.ok ? undefined : notifications.ownerEmail.error },
       },
       message: booking.paymentMethod === "Pay on Arrival"
         ? "Booking reserved successfully. Payment status is Payment Pending and the full amount is due on arrival."

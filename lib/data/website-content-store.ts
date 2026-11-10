@@ -104,12 +104,12 @@ export const defaultWebsiteContent: WebsiteContent = {
   },
   general: {
     contactPhone: "+94 77 123 4567",
-    whatsappNumber: "+94771234567",
+    whatsappNumber: "+94701557055",
     email: "boatsafariwithmalish@gmail.com",
     meetingPoint: "Koggala Lake meeting point",
     footerText: "Private boat safaris and kayaking adventures on Koggala Lake with Malish.",
-    instagram: "https://www.instagram.com/koggalalakeboatsafarikayaking/",
-    facebook: "",
+    instagram: "https://www.instagram.com/koggalalakewithmalish/",
+    facebook: "https://www.facebook.com/share/1Z4oyp6pMV/?mibextid=wwXIfr",
     tripadvisor: "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html",
   },
   reviews: {
@@ -133,8 +133,10 @@ export const defaultWebsiteContent: WebsiteContent = {
     },
   },
   socialLinks: [
-    { id: "instagram", platform: "Instagram", name: "Koggala Lake Boat Safari", url: "https://www.instagram.com/koggalalakeboatsafarikayaking/", imageUrl: "" },
-    { id: "whatsapp", platform: "WhatsApp", name: "Chat on WhatsApp", url: "https://wa.me/94771234567", imageUrl: "" },
+    { id: "facebook", platform: "Facebook", name: "Koggala Lake with Malish", url: "https://www.facebook.com/share/1Z4oyp6pMV/?mibextid=wwXIfr", imageUrl: "" },
+    { id: "instagram", platform: "Instagram", name: "Koggala Lake with Malish", url: "https://www.instagram.com/koggalalakewithmalish/", imageUrl: "" },
+    { id: "tiktok", platform: "TikTok", name: "Koggala Lake with Malish", url: "https://www.tiktok.com/@koggalalakewithmalish/", imageUrl: "" },
+    { id: "whatsapp", platform: "WhatsApp", name: "Chat on WhatsApp", url: "https://wa.me/94701557055", imageUrl: "" },
     { id: "tripadvisor", platform: "Tripadvisor", name: "Koggala Lake Boat Safari", url: "https://www.tripadvisor.co.uk/Attraction_Review-g1189030-d26934724-Reviews-Koggala_Lake_Boat_Safari_Kayak_Adventure_with_Malish-Koggala_Galle_District_Sou.html", imageUrl: "" },
   ],
   locations: {
@@ -145,7 +147,7 @@ export const defaultWebsiteContent: WebsiteContent = {
     businessName: "Koggala Lake Boat Safari with Malish",
     businessLogoUrl: "",
     ownerEmail: "boatsafariwithmalish@gmail.com",
-    ownerWhatsApp: "+94771234567",
+    ownerWhatsApp: "+94701557055",
     bookingInstructions: "Please arrive 15 minutes before departure and bring your booking reference.",
   },
 };

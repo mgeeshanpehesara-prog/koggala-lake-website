@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Booking, GalleryImage, PriceTier, Product, Review, TimeSlotCutoff, TimeSlotCutoffUnit } from "@/lib/types";
+import type { Booking, GalleryImage, NotificationLogEntry, PriceTier, Product, Review, TimeSlotCutoff, TimeSlotCutoffUnit } from "@/lib/types";
 import type { ManagedReview } from "@/lib/data/reviews-store";
 import type { SocialLink, WebsiteContent } from "@/lib/data/website-content-store";
 
@@ -35,6 +35,13 @@ const formatBookingDateTime = (value?: string) => {
   if (!value) return "Not provided";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" });
+};
+
+const formatNotificationStatus = (entry?: NotificationLogEntry) => {
+  if (!entry) return "— Not sent yet";
+  if (entry.status === "sent") return `✅ Sent${entry.sentAt ? ` (${formatBookingDateTime(entry.sentAt)})` : ""}`;
+  if (entry.status === "not_configured") return `⚠️ Email provider not configured${entry.error ? ` — ${entry.error}` : ""}`;
+  return `❌ Failed to send${entry.error ? ` — ${entry.error}` : ""}`;
 };
 
 const isImageFile = (file: File) => file.type.startsWith("image/") || SUPPORTED_IMAGE_EXTENSIONS.test(file.name);
@@ -198,13 +205,20 @@ export default function AdminPage() {
       fetch("/api/admin/gallery", { cache: "no-store" }),
     ]);
 
+    if ([productResponse, bookingResponse, contentResponse, reviewResponse, galleryResponse].some((response) => response.status === 401)) {
+      setLogged(false);
+      setMessage("Your admin session is no longer valid. Please sign in again.");
+      return;
+    }
+
     if (productResponse.ok) {
       const data = await productResponse.json();
       setProducts(data);
-      setLogged(true);
     } else {
-      setLogged(false);
+      setMessage("Admin login succeeded, but product data could not be loaded. Check the server logs.");
     }
+
+    setLogged(true);
 
     if (bookingResponse.ok) {
       const data = await bookingResponse.json();
@@ -260,20 +274,27 @@ export default function AdminPage() {
   }, [bookings, bookingSearch, bookingSort, bookingStatusFilter, paymentStatusFilter]);
 
   const login = async () => {
-    const response = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (response.ok) {
-      setLogged(true);
-      setMessage("Logged in");
-      await load();
-      return;
+      if (response.ok) {
+        setLogged(true);
+        setMessage("Logged in");
+        await load();
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+      setMessage(data?.error || (response.status === 503
+        ? "Admin login is not configured on this deployment. Set ADMIN_EMAIL, ADMIN_PASSWORD and ADMIN_SESSION_TOKEN in your hosting provider's environment variables."
+        : "Login failed. Check your email and password."));
+    } catch {
+      setMessage("Login failed. Please check your connection and try again.");
     }
-
-    setMessage("Login failed. Add ADMIN_EMAIL, ADMIN_PASSWORD and ADMIN_SESSION_TOKEN to .env.local.");
   };
 
   const save = async () => {
@@ -1231,6 +1252,7 @@ export default function AdminPage() {
                   <section><h4>Location Information</h4><p><strong>Meeting point:</strong> {content?.general.meetingPoint || "Not provided"}</p><p><strong>Pickup information:</strong> {selectedBooking.hotelName ? "Hotel pickup requested" : "No hotel pickup requested"}</p><p><strong>Hotel / accommodation:</strong> {selectedBooking.hotelName || "Not provided"}</p><p><strong>Pickup location:</strong> {selectedBooking.hotelAddress || "Not provided"}</p></section>
                   <section><h4>Payment Information</h4><p><strong>Total amount:</strong> {selectedBooking.currency || "USD"} {selectedBooking.totalAmount || 0}</p><p><strong>Amount paid:</strong> {selectedBooking.currency || "USD"} {selectedBooking.amountPaid || 0}</p><p><strong>Amount due:</strong> {selectedBooking.currency || "USD"} {selectedBooking.remainingBalance || 0}</p><p><strong>Customer currency:</strong> {selectedBooking.currency || "USD"}</p><p><strong>Payment method:</strong> {selectedBooking.paymentMethod || "Not provided"}</p><p><strong>Card brand:</strong> {selectedBooking.paymentBrand || "Not applicable"}</p><p><strong>Payment status:</strong> {selectedBooking.paymentStatus || "Pending"}</p><p><strong>Transaction ID:</strong> {selectedBooking.payherePaymentId || "Not provided"}</p></section>
                   <section><h4>System Information</h4><p><strong>Created:</strong> {formatBookingDateTime(selectedBooking.createdAt)}</p><p><strong>Last updated:</strong> {formatBookingDateTime(selectedBooking.updatedAt)}</p></section>
+                  <section><h4>Notification Status</h4><p><strong>Customer email:</strong> {formatNotificationStatus(selectedBooking.notifications?.customerEmail)}</p><p><strong>Business/admin email:</strong> {formatNotificationStatus(selectedBooking.notifications?.ownerEmail)}</p></section>
                 </div>
 
                 <div className="admin-status-controls">

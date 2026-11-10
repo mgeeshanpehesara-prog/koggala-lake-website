@@ -56,6 +56,23 @@ export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 export type PaymentStatus = "Unpaid" | "Pending" | "Payment Pending" | "Paid" | "Failed" | "Cancelled" | "Refunded";
 export type PaymentMethod = "Pay Online - Full Amount" | "Pay on Arrival";
 
+// Email delivery states must be distinguishable: a successfully delivered
+// email is different from a missing provider configuration, which is
+// different again from a provider rejecting/failing the send.
+export type NotificationDeliveryStatus = "sent" | "not_configured" | "failed";
+
+export interface NotificationLogEntry {
+  status: NotificationDeliveryStatus;
+  error?: string;
+  providerId?: string;
+  sentAt: string;
+}
+
+export interface BookingNotificationsLog {
+  customerEmail?: NotificationLogEntry;
+  ownerEmail?: NotificationLogEntry;
+}
+
 export interface Booking {
   id: string;
   bookingReference: string;
@@ -88,6 +105,7 @@ export interface Booking {
   createdAt: string;
   updatedAt?: string;
   gatewayConfigured?: boolean;
+  notifications?: BookingNotificationsLog;
 }
 
 export interface Review {

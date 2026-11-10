@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import { siteConfig } from "@/lib/site-config";
 import { whatsappLink } from "@/lib/utils";
-import CTAButton from "@/components/ui/CTAButton";
 import { getWebsiteContent } from "@/lib/data/website-content-store";
+import SocialIcon from "@/components/ui/SocialIcon";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -13,12 +13,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ContactPage() {
-  const { general } = await getWebsiteContent();
-  const socials = [
-    { label: "Facebook", href: general.facebook },
-    { label: "Instagram", href: general.instagram },
-    { label: "Tripadvisor", href: general.tripadvisor },
-  ].filter((social) => social.href);
+  const content = await getWebsiteContent();
+  const { general } = content;
+  const socials = content.socialLinks.filter((social) =>
+    ["Facebook", "Instagram", "TikTok"].includes(social.platform) && social.url
+  );
   return (
     <>
       <PageHero
@@ -41,10 +40,18 @@ export default async function ContactPage() {
         <div className="container-premium mt-14">
           <h2 className="font-display text-xl font-medium text-sand-50">Follow Us</h2>
           <div className="mt-5 flex flex-wrap gap-3">
-            {socials.map((s) => (
-              <CTAButton key={s.label} href={s.href} variant="secondary">
-                {s.label}
-              </CTAButton>
+            {socials.map((social) => (
+              <a
+                key={social.id}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name || social.platform}
+                className="group inline-flex items-center gap-2 rounded-full glass-panel px-6 py-3 text-sm font-semibold tracking-wide text-sand-50 transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5"
+              >
+                <SocialIcon label={social.platform} />
+                {social.platform}
+              </a>
             ))}
           </div>
         </div>

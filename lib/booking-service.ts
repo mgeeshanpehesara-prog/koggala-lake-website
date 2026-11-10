@@ -5,8 +5,10 @@ import { getAllProducts } from "@/lib/data/product-store";
 import { getTimeSlotCutoff, isTimeSlotBookable } from "@/lib/time-slots";
 import { convertPrice } from "@/lib/currency/currency";
 import { getCurrencyRates } from "@/lib/currency/rate-service";
+import { isSupabaseConfigured, supabaseRequest } from "@/lib/supabase/server";
 
 const file = path.join(process.cwd(), "data", "bookings.json");
+type BookingRow = { id: string; booking: Booking };
 
 export const PAYMENT_METHODS = ["Pay Online - Full Amount", "Pay on Arrival"] as const;
 export const PAYMENT_STATUSES: PaymentStatus[] = ["Unpaid", "Pending", "Payment Pending", "Paid", "Failed", "Cancelled", "Refunded"];
@@ -19,6 +21,13 @@ export function createBookingReference() {
 }
 
 export async function readBookings(): Promise<Booking[]> {
+  if (isSupabaseConfigured()) {
+    const rows = await supabaseRequest<BookingRow[]>("bookings", {
+      query: "select=id,booking&order=created_at.asc",
+    });
+    return rows.map((row) => row.booking);
+  }
+
   try {
     const raw = await fs.readFile(file, "utf8");
     return JSON.parse(raw) as Booking[];
@@ -28,6 +37,18 @@ export async function readBookings(): Promise<Booking[]> {
 }
 
 export async function writeBookings(bookings: Booking[]) {
+  if (isSupabaseConfigured()) {
+    if (bookings.length) {
+      await supabaseRequest("bookings", {
+        method: "POST",
+        query: "on_conflict=id",
+        body: bookings.map((booking) => ({ id: booking.id, booking })),
+        prefer: "resolution=merge-duplicates,return=minimal",
+      });
+    }
+    return;
+  }
+
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(bookings, null, 2), "utf8");
 }
